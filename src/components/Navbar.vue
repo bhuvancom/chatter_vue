@@ -2,7 +2,7 @@
   <div class="navbar">
     <nav class="deep-purple darken-1">
       <div class="container">
-        <router-link :to="{name:'Welcome'}" class="brand-logo left">Chatter</router-link>
+        <router-link :to="{name:'Dashboard'}" class="brand-logo left">Chatter</router-link>
         <ul class="right">
           <li>
             <router-link :to="{name:'Dashboard'}">Home</router-link>

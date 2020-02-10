@@ -70,9 +70,9 @@
   </div>
 </template>
 <script>
-import firebase from 'firebase';
-import db from '@/firebase/init';
-import slugify from 'slugify';
+import firebase from "firebase";
+import db from "@/firebase/init";
+import slugify from "slugify";
 export default {
   name: "Welcome",
   data() {
@@ -84,8 +84,27 @@ export default {
       email: null,
       password: null,
       uName: null,
-      feedbackS: null
+      feedbackS: null,
+      userName: null
     };
+  },
+  created() {
+    let us = firebase.auth().currentUser;
+    if (us) {
+      let ref = db.collection("users");
+      ref
+        .where("user_id", "==", us.uid)
+        .get()
+        .then(snap => {
+          snap.forEach(ele => {
+            // this.currentUser = ele.data().user_name;
+            this.$router.push({
+              name: "Dashboard",
+              params: { currentUserName: ele.data().user_name }
+            });
+          });
+        });
+    }
   },
   methods: {
     login() {
@@ -97,11 +116,22 @@ export default {
           .auth()
           .signInWithEmailAndPassword(this.lEmail, this.lPwd)
           .then(cred => {
-            var user = cred.user;
-            this.$router.push({ name: "Dashboard" });
+            console.log(cred.user.uid);
+            db.collection("users")
+              .where("user_id", "==", cred.user.uid)
+              .get()
+              .then(snap => {
+                snap.forEach(ele => {
+                  // this.currentUser = ele.data().user_name;
+                  this.$router.push({
+                    name: "Dashboard",
+                    params: { currentUserName: ele.data().user_name }
+                  });
+                });
+              });
           })
           .catch(err => {
-            this.showProgress(false)
+            this.showProgress(false);
             this.feedback = err;
           });
       } else {
@@ -137,8 +167,10 @@ export default {
                 })
                 .then(() => {
                   this.showProgress(false);
-                  // open Dashboard,
-                  this.$router.push({ name: "Dashboard" ,props:{user:this.user_name}});
+                  this.$router.push({
+                    name: "Dashboard",
+                    params: { currentUserName: this.user_name }
+                  });
                 })
                 .catch(err => {
                   this.showProgress(false);
@@ -176,6 +208,24 @@ export default {
         ? $(".progress").removeClass("hide")
         : $(".progress").addClass("hide");
     }
+  },
+  beforeMount() {
+    // let us = firebase.auth().currentUser;
+    // if (us) {
+    //   let ref = db.collection("users");
+    //   ref
+    //     .where("user_id", "==", us.uid)
+    //     .get()
+    //     .then(snap => {
+    //       snap.forEach(ele => {
+    //         // this.currentUser = ele.data().user_name;
+    //         this.$router.push({
+    //           name: "Dashboard",
+    //           params: { currentUserName: ele.data().user_name }
+    //         });
+    //       });
+    //     });
+    // }
   }
 };
 </script>

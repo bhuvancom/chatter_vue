@@ -13,7 +13,19 @@ const router = new Router({
     routes: [{
             path: '/',
             name: 'Welcome',
-            component: Welcome
+            component: Welcome,
+            // beforeEnter(to, from, next) {
+            //     if (from.params.currentUserName) {
+            //         next({
+            //             name: 'Dashboard',
+            //             params: {
+            //                 currentUserName: from.params.currentUserName
+            //             }
+            //         })
+            //     } else {
+            //         next();
+            //     }
+            // }
         },
         {
             path: '/Chat',
@@ -21,15 +33,35 @@ const router = new Router({
             component: Chat,
             props: true,
             meta: {
-                requiresAuth: true
+                requiresAuth: true,
+                //requireProp: true,
+            },
+            beforeEnter(to, from, next) {
+                if (to.params.toV && to.params.fromV) {
+                    next();
+                } else {
+                    next({
+                        name: 'Welcome'
+                    })
+                }
             }
         },
         {
             path: '/Dashboard',
             name: 'Dashboard',
+            props: true,
             component: Dashboard,
             meta: {
                 requiresAuth: true,
+            },
+            beforeEnter(to, from, next) {
+                if (to.params.currentUserName) {
+                    next();
+                } else {
+                    next({
+                        name: 'Welcome'
+                    })
+                }
             }
         },
         {

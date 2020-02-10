@@ -3,7 +3,10 @@
     <h2 class="center teal-text">Bhuvancom Chat</h2>
     <div class="card">
       <div class="card-content">
-        <ul class="messages" v-chat-scroll>
+        <ul class="messages collection with-header" v-chat-scroll>
+          <li class="collection-header">
+            <h4 class="center deep-purple-text">Chat with {{toV}}</h4>
+          </li>
             <li v-for="msg in messages" :key="msg.id" class="row">
               <div class="card" v-bind:class="[msg.name==name?'right me':'left you']">
                 <span class="name" v-bind:class="[msg.name==name?'me right':'teal-text left']">{{msg.name}}</span><br>
@@ -30,18 +33,17 @@ import NewMessage from "@/components/NewMessage";
 import moment from "moment";
 export default {
   name: "Chat",
-  props: ["name"],
+  props: ["toV","fromV"],
   components: {
     NewMessage
   },
   data() {
     return {
-      messages: []
+      messages: [],
+      name:null,
     };
   },
   created() {
-    console.log(this.name);
-    
     let ref = db.collection("messages").orderBy("timeStamp");
     ref.onSnapshot(snapshot => {
       snapshot.docChanges().forEach(change => {
@@ -58,8 +60,8 @@ export default {
     });
   },
   mounted(){
-    console.log(name);
-  },
+    
+  }
 
 };
 </script>
