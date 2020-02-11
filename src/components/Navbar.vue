@@ -40,7 +40,12 @@ export default {
         });
     },
     profile() {
-      this.$router.push({ name: "Profile" });
+      this.$router
+        .push({
+          name: "Profile",
+          params: { uid: firebase.auth().currentUser.uid }
+        })
+        .catch(err => {});
     }
   },
   created() {

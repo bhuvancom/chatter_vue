@@ -28,25 +28,6 @@ const router = new Router({
             // }
         },
         {
-            path: '/Chat',
-            name: 'Chat',
-            component: Chat,
-            props: true,
-            meta: {
-                requiresAuth: true,
-                //requireProp: true,
-            },
-            beforeEnter(to, from, next) {
-                if (to.params.toV && to.params.fromV) {
-                    next();
-                } else {
-                    next({
-                        name: 'Welcome'
-                    })
-                }
-            }
-        },
-        {
             path: '/Dashboard',
             name: 'Dashboard',
             props: true,
@@ -55,7 +36,7 @@ const router = new Router({
                 requiresAuth: true,
             },
             beforeEnter(to, from, next) {
-                if (to.params.currentUserName) {
+                if (to.params.uid) {
                     next();
                 } else {
                     next({
@@ -67,9 +48,19 @@ const router = new Router({
         {
             path: '/Profile',
             name: 'Profile',
+            props: true,
             component: Profile,
             meta: {
                 requiresAuth: true,
+            },
+            beforeEnter(to, from, next) {
+                if (to.params.uid) {
+                    next();
+                } else {
+                    next({
+                        name: 'Welcome'
+                    })
+                }
             }
         }
     ]

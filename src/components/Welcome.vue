@@ -26,7 +26,31 @@
               <label for="password">Password:</label>
               <input type="password" name="lPwd" v-model="lPwd" />
             </div>
-            <h6 class="pink-text center">Forget Password!</h6>
+            <div class="center">
+              <!-- Modal Trigger -->
+              <a
+                id="opn"
+                @click="forget"
+                href="#model1"
+                data-target="modal1"
+                class="red-text modal-trigger"
+              >Forget Password</a>
+
+              <!-- Modal Structure -->
+              <div id="modal1" class="modal">
+                <div class="modal-content">
+                  <h4>Reset Password</h4>
+                  <p>A bunch of text</p>
+                </div>
+                <div class="modal-footer">
+                  <a
+                    @click.prevent="forget"
+                    href="#!"
+                    class="modal-close waves-effect waves-green btn-flat"
+                  >Send</a>
+                </div>
+              </div>
+            </div>
             <p v-if="this.feedback" class="center red-text">{{this.feedback}}</p>
             <div class="progress hide">
               <div class="indeterminate blue"></div>
@@ -73,6 +97,9 @@
 import firebase from "firebase";
 import db from "@/firebase/init";
 import slugify from "slugify";
+$(document).ready(function() {
+  $(".modal").modal();
+});
 export default {
   name: "Welcome",
   data() {
@@ -88,25 +115,15 @@ export default {
       userName: null
     };
   },
-  created() {
-    let us = firebase.auth().currentUser;
-    if (us) {
-      let ref = db.collection("users");
-      ref
-        .where("user_id", "==", us.uid)
-        .get()
-        .then(snap => {
-          snap.forEach(ele => {
-            // this.currentUser = ele.data().user_name;
-            this.$router.push({
-              name: "Dashboard",
-              params: { currentUserName: ele.data().user_name }
-            });
-          });
-        });
-    }
-  },
+  created() {},
   methods: {
+    forget() {
+      //now you can open modal from code
+      $("#modal1").modal("open");
+
+      //or by click on trigger
+      //$(".trigger-modal").modal();
+    },
     login() {
       this.showProgress(true);
       if (this.lEmail && this.lPwd) {
@@ -116,19 +133,11 @@ export default {
           .auth()
           .signInWithEmailAndPassword(this.lEmail, this.lPwd)
           .then(cred => {
-            console.log(cred.user.uid);
-            db.collection("users")
-              .where("user_id", "==", cred.user.uid)
-              .get()
-              .then(snap => {
-                snap.forEach(ele => {
-                  // this.currentUser = ele.data().user_name;
-                  this.$router.push({
-                    name: "Dashboard",
-                    params: { currentUserName: ele.data().user_name }
-                  });
-                });
-              });
+            //console.log(cred.user.uid);
+            this.$router.push({
+              name: "Dashboard",
+              params: { uid: cred.user.uid }
+            });
           })
           .catch(err => {
             this.showProgress(false);
@@ -153,24 +162,26 @@ export default {
           .get()
           .then(doc => {
             if (doc.exists) {
+              this.showProgress(false);
               this.feedbackS = "This User Name alreday exists, use another";
             } else {
               firebase
                 .auth()
                 .createUserWithEmailAndPassword(this.email, this.password)
                 .then(cred => {
-                  ref.set({
-                    user_name: this.user_name,
-                    name: this.uName,
-                    user_id: cred.user.uid
-                  });
-                })
-                .then(() => {
-                  this.showProgress(false);
-                  this.$router.push({
-                    name: "Dashboard",
-                    params: { currentUserName: this.user_name }
-                  });
+                  ref
+                    .set({
+                      user_name: this.user_name,
+                      name: this.uName,
+                      user_id: cred.user.uid
+                    })
+                    .then(() => {
+                      this.showProgress(false);
+                      this.$router.push({
+                        name: "Dashboard",
+                        params: { uid: cred.user.uid }
+                      });
+                    });
                 })
                 .catch(err => {
                   this.showProgress(false);
@@ -210,22 +221,13 @@ export default {
     }
   },
   beforeMount() {
-    // let us = firebase.auth().currentUser;
-    // if (us) {
-    //   let ref = db.collection("users");
-    //   ref
-    //     .where("user_id", "==", us.uid)
-    //     .get()
-    //     .then(snap => {
-    //       snap.forEach(ele => {
-    //         // this.currentUser = ele.data().user_name;
-    //         this.$router.push({
-    //           name: "Dashboard",
-    //           params: { currentUserName: ele.data().user_name }
-    //         });
-    //       });
-    //     });
-    // }
+    let us = firebase.auth().currentUser;
+    if (us) {
+      this.$router.push({
+        name: "Dashboard",
+        params: { uid: us.uid }
+      });
+    }
   }
 };
 </script>

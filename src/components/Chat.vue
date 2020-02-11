@@ -4,24 +4,27 @@
     <div class="card">
       <div class="card-content">
         <ul class="messages collection with-header" v-chat-scroll>
-          <li class="collection-header">
-            <h4 class="center deep-purple-text">Chat with {{toV}}</h4>
+          <li v-for="(msg,i) in messages" :key="i" class="row">
+            <div class="card" v-bind:class="[msg.from==fromV?'right me':'left you']">
+              <span
+                class="name"
+                v-bind:class="[msg.from==fromV?'me right':'teal-text left']"
+              >{{msg.from}}</span>
+              <br />
+              <span
+                class="grey-text msg text-darken-3"
+                v-bind:class="[msg.from==fromV?'right':'left']"
+              >{{msg.content}}</span>
+              <br />
+              <span class="grey-text time right">{{msg.timeStamp}}</span>
+            </div>
+            <br />
+            <br />
           </li>
-            <li v-for="msg in messages" :key="msg.id" class="row">
-              <div class="card" v-bind:class="[msg.name==name?'right me':'left you']">
-                <span class="name" v-bind:class="[msg.name==name?'me right':'teal-text left']">{{msg.name}}</span><br>
-                <span class="grey-text msg text-darken-3" v-bind:class="[msg.name==name?'right':'left']">{{msg.content}}</span><br>
-                <span
-                  class="grey-text time right"
-                >{{msg.timeStamp}}</span>
-              </div>
-              <br />
-              <br />
-            </li>
         </ul>
       </div>
       <div class="card-action">
-        <NewMessage :name="name" />
+        <NewMessage :fromV="fromV" />
       </div>
     </div>
   </div>
@@ -33,36 +36,42 @@ import NewMessage from "@/components/NewMessage";
 import moment from "moment";
 export default {
   name: "Chat",
-  props: ["toV","fromV"],
+  props: ["fromV"],
   components: {
     NewMessage
   },
   data() {
     return {
       messages: [],
-      name:null,
+      name: null
     };
   },
   created() {
+    //console.log(this.toV,this.fromV);
     let ref = db.collection("messages").orderBy("timeStamp");
-    ref.onSnapshot(snapshot => {
-      snapshot.docChanges().forEach(change => {
-        if (change.type == "added") {
-          let doc = change.doc;
-          this.messages.push({
-            id: doc.id,
-            name: doc.data().name,
-            content: doc.data().content,
-            timeStamp: moment(doc.data().timeStamp).format("lll")
-          });
-        }
-      });
-    });
+    // .where("from", "==", this.fromV)
+    // .where("to", "==", this.toV);
+    ref.onSnapshot(
+      snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type == "added") {
+            let doc = change.doc;
+            //console.log(doc.data());
+            this.messages.push({
+              id: doc.id,
+              from: doc.data().from,
+              content: doc.data().content,
+              timeStamp: moment(doc.data().timeStamp).format("lll")
+            });
+          }
+        });
+      },
+      error => {
+        console.log("thisis", error);
+      }
+    );
   },
-  mounted(){
-    
-  }
-
+  mounted() {}
 };
 </script>
 <style>
@@ -71,7 +80,7 @@ export default {
   margin-bottom: 40px;
 }
 .chat .name {
-  font-size: .9em;
+  font-size: 0.9em;
 }
 .chat .time {
   display: block;
@@ -98,21 +107,22 @@ export default {
   font-size: 0.9em;
   padding: 8px;
   background: rgb(223, 238, 141);
-  text-align:left;
+  text-align: left;
   margin-right: 8px;
   border-radius: 15% 0% 15% 15%;
 }
-.name{
+.name {
   font-size: 5px;
   padding: 8px;
 }
-.msg{
+.msg {
   font-size: 1.2em;
   padding: 8px;
 }
-.you{
+.you {
   background-color: rgb(236, 229, 229);
   border-radius: 0% 15% 15% 15%;
   padding: 8px;
+  margin-left: 4px;
 }
 </style>

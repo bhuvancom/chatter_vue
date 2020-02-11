@@ -11,7 +11,7 @@
 import db from "@/firebase/init";
 export default {
   name: "NewMessage",
-  props: ["name"],
+  props: ["fromV"],
   data() {
     return {
       newMessage: null,
@@ -21,10 +21,13 @@ export default {
   methods: {
     addMessage() {
       if (this.newMessage) {
+        //console.log(this.toV,this.fromV);
+        let msg = this.newMessage;
+        this.newMessage = null;
         db.collection("messages")
           .add({
-            content: this.newMessage,
-            name: this.name,
+            from:this.fromV,
+            content: msg,
             timeStamp: Date.now()
           })
           .then(() => {

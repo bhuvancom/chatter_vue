@@ -5,7 +5,8 @@ import App from './App'
 import router from './router'
 import VueChatScroll from 'vue-chat-scroll'
 import firebase from 'firebase'
-
+import VueSession from 'vue-session'
+Vue.use(VueSession)
 Vue.use(VueChatScroll)
 
 Vue.config.productionTip = false
